@@ -202,7 +202,7 @@ def instrument_parameters_odim5(radar, odim_file):
     Returns
     -------
     radar : Radar
-        Py-ART radar structure with added 'instrument_parameters'.
+        Py-ART radar structure with added 'instrument_parameters' dictionary.
     """
 
     ny, prt, prt_mode, prt_ratio, prf_flag = _get_prf_pars_odimh5(odim_file, nrays=radar.nrays, 
