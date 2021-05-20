@@ -553,9 +553,9 @@ def _get_prf_pars(radar):
             prf_fact = int(round(1 / (prt_rat - 1), 0))
 
     if prt_mode == b'dual':
-        prf_flag = pars['prf_flag']['data']
+        prf_flag = pars['prf_flag']['data'].astype(int)
 
-    return v_nyq, prf_h, prf_fact, prf_flag.astype(int)
+    return v_nyq, prf_h, prf_fact, prf_flag
 
 
 def _get_prf_pars_odimh5(odim_file, nrays, nsweeps, sw_start_end):
