@@ -1,0 +1,10 @@
+README.md
+setup.py
+vcor_dual_prf/__init__.py
+vcor_dual_prf/file_tools.py
+vcor_dual_prf/vcor_dual_prf.py
+vcor_dual_prf.egg-info/PKG-INFO
+vcor_dual_prf.egg-info/SOURCES.txt
+vcor_dual_prf.egg-info/dependency_links.txt
+vcor_dual_prf.egg-info/requires.txt
+vcor_dual_prf.egg-info/top_level.txt
