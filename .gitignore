@@ -16,3 +16,6 @@ Thumbs.db
 # Byte-compiled / optimized / DLL files
 __pycache__/
 ./examples/__pycache__/
+build/
+dist/
+vcor_dual_prf.egg_info/
