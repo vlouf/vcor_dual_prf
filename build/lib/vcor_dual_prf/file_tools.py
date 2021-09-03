@@ -134,8 +134,11 @@ def _get_prf_pars_odimh5(odim_file, nrays, nsweeps, sw_start_end):
             ny = d_how['NI']              # Nyquist
             prf_h = d_how['highprf']
             prf_ratio = d_how['rapic_UNFOLDING'] # the prf ratio (e.g. 2:3 etc) or None
-            prf_type = d_how['rapic_HIPRF']
-    
+            if 'rapic_HIPRF' in d_how:
+                prf_type = d_how['rapic_HIPRF']
+            else:
+                prf_type = None
+
             # extract rays for current sweep
             ray_s, ray_e = sw_start_end(sw) # start and end rays of sweep
             ray_e += 1

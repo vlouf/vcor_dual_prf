@@ -2,7 +2,7 @@ import numpy as np
 import h5py
 
 def add_vcor_field(radar, field_i, field_o, data, std_name=None,
-                   long_name=None, replace=False):
+                   long_name=None, replace=False, description=None):
     """
    Add a field to the object with metadata from a existing field 
    (Py-ART) adding the possibility of defining "standard name" and 
@@ -24,6 +24,8 @@ def add_vcor_field(radar, field_i, field_o, data, std_name=None,
         Long name of added field
     replace : bool
         True to replace the existing field
+    description: str
+        Description for metadata
         
     """
 
@@ -33,6 +35,8 @@ def add_vcor_field(radar, field_i, field_o, data, std_name=None,
         radar.fields[field_o]['long_name'] = long_name
     if std_name is not None:
         radar.fields[field_o]['standard_name'] = std_name
+    if description is not None:
+        radar.fields[field_o]['dualprf_correction'] = description
         
         
 def instrument_parameters_odimh5(radar, odim_file):
