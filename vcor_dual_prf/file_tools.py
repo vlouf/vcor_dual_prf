@@ -135,13 +135,17 @@ def _get_prf_pars_odimh5(odim_file, nrays, nsweeps, sw_start_end):
             # extract PRF/NI data from odimh5 file
             d_name = 'dataset' + str(sw+1)
             d_how = hfile[d_name]['how'].attrs
-            ny = d_how['NI']              # Nyquist
-            prf_h = d_how['highprf']
-            prf_ratio = d_how['rapic_UNFOLDING'] # the prf ratio (e.g. 2:3 etc) or None
-            if 'rapic_HIPRF' in d_how:
+            try:
+                ny = d_how['NI']              # Nyquist
+                prf_h = d_how['highprf']
+                prf_ratio = d_how['rapic_UNFOLDING'] # the prf ratio (e.g. 2:3 etc) or None
                 prf_type = d_how['rapic_HIPRF']
-            else:
+            except Exception as e:
+                ny = 0
+                prf_h = 1000
+                prf_ratio = None
                 prf_type = None
+                print(f'No VRADH metadata found for sweep {sw} in {odim_file}')
 
             # extract rays for current sweep
             ray_s, ray_e = sw_start_end(sw) # start and end rays of sweep
@@ -151,7 +155,7 @@ def _get_prf_pars_odimh5(odim_file, nrays, nsweeps, sw_start_end):
             prt_array[ray_s:ray_e] = 1/prf_h
             ny_array[ray_s:ray_e] = ny
     
-            if prf_ratio != b'None':
+            if prf_ratio != b'None' and prf_type != None:
         
                 prt_mode_array[sw] = b'dual'
         
@@ -165,8 +169,12 @@ def _get_prf_pars_odimh5(odim_file, nrays, nsweeps, sw_start_end):
                     flag_sw[::2] = 1 # with 1 as the first index, 1=1, 2=0, 3=1
                 elif prf_type==b'ODDS': #odds=0, evens=1
                     flag_sw[1::2] = 1 #with 1 as the first index, 1=0, 2=1, 3=0
+                elif prf_type==b'None':
+                    prt_mode_array[sw] = b'fixed'
                 else:
                     print('error, unknown flag type', prf_type)
+                #reinsert flag sweep into prf_flag_array
+                prf_flag_array[ray_s:ray_e] = flag_sw
             else:
                 prt_mode_array[sw] = b'fixed'
 
