@@ -136,17 +136,29 @@ def _get_prf_pars_odimh5(odim_file, nrays, nsweeps, sw_start_end):
             d_name = 'dataset' + str(sw+1)
             d_how = hfile[d_name]['how'].attrs
             try:
-                ny = d_how['NI']              # Nyquist
-                prf_h = d_how['highprf']
-                prf_ratio = d_how['rapic_UNFOLDING'] # the prf ratio (e.g. 2:3 etc) or None
-                prf_type = d_how['rapic_HIPRF']
+                ny = d_how['NI']
             except Exception as e:
                 ny = 0
+                print(f'Failed to read NI for sweep {sw} in {odim_file}', e)
+                
+            try:
+                prf_h = d_how['highprf']
+            except Exception as e:
                 prf_h = 1000
+                print(f'Failed to read highprf for sweep {sw} in {odim_file}', e)
+                
+            try:
+                prf_ratio = d_how['rapic_UNFOLDING']
+            except Exception as e:
                 prf_ratio = None
+                print(f'Failed to read rapic_UNFOLDING for sweep {sw} in {odim_file}', e)
+                
+            try:
+                prf_type = d_how['rapic_HIPRF']
+            except Exception as e:
                 prf_type = None
-                print(f'No VRADH metadata found for sweep {sw} in {odim_file}')
-
+                print(f'rapic_HIPRF missing for sweep {sw} in {odim_file}, assuming single PRF', e)
+                
             # extract rays for current sweep
             ray_s, ray_e = sw_start_end(sw) # start and end rays of sweep
             ray_e += 1

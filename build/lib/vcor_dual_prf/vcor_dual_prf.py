@@ -159,7 +159,7 @@ def correct_dualprf(radar, method_det, vel_field='velocity',
     # ADD CORRECTED VELOCITY FIELD
     file_tools.add_vcor_field(radar, field_i=vel_field, field_o=new_field, 
                         data=vcorr, std_name=None,
-                        description=,'Correction of dual-PRF applied using technique developed by Hengstebeck et al. (2018) doi:10.1175/JTECH-D-16-0230.1. Implementation by Servei Meteorològic de Catalunya at https://github.com/meteocat/vcor_dual_prf',
+                        description='Correction of dual-PRF applied using technique developed by Hengstebeck et al. (2018) doi:10.1175/JTECH-D-16-0230.1. Implementation by Servei Meteorològic de Catalunya at https://github.com/meteocat/vcor_dual_prf',
                         long_name=new_field_lname, replace=replace)
 
 
