@@ -6,8 +6,6 @@ setup.py
 dist/vcor_dual_prf-1.0.0-py3.8.egg
 examples/01_correct_and_display.ipynb
 examples/examples_index.ipynb
-examples/vcor_dual_prf.py
-examples/vcor_dual_prf.pyc
 examples/img/construction_site.png
 sample_data/CDV180107_tornado.RAW
 sample_data/LMI171018_squallline.RAW

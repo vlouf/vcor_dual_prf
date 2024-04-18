@@ -173,7 +173,7 @@ def _get_prf_pars_odimh5(odim_file, nrays, nsweeps, sw_start_end):
                     prt_ratio = fact_l/fact_h
                 except Exception as e:
                     prt_ratio = None
-                    print(f'Failed to read rapic_UNFOLDING for sweep {sw} in {odim_file}', e)
+                    #print(f'Failed to read rapic_UNFOLDING for sweep {sw} in {odim_file}', e)
                     
                 try:
                     prf_type_str = d_how['rapic_HIPRF']

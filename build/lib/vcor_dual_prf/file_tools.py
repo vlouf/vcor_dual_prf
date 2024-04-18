@@ -147,16 +147,39 @@ def _get_prf_pars_odimh5(odim_file, nrays, nsweeps, sw_start_end):
                 prf_h = 1000
                 print(f'Failed to read highprf for sweep {sw} in {odim_file}', e)
                 
-            try:
-                prf_ratio = d_how['rapic_UNFOLDING']
-            except Exception as e:
-                prf_ratio = None
-                print(f'Failed to read rapic_UNFOLDING for sweep {sw} in {odim_file}', e)
-                
-            try:
-                prf_type = d_how['rapic_HIPRF']
-            except Exception as e:
-                prf_type = None #single PRF
+
+            if 'prt' in d_how.keys():
+                #post dec 2024 metadata
+                prt_vector = d_how['prt']
+                prf_l = d_how['lowprf']
+                #calculate prt ratio
+                prt_ratio = prf_l/prf_h
+                #calculate prf mode
+                prf_1 = prt_vector[0]
+                prf_2 = prt_vector[1]
+                #check if start on high PRF
+                if 1/prf_1 > 1/prf_2:
+                    #ODDS mode, starting on high prf
+                    prf_type = 'ODDS'
+                else:
+                    #EVENS mode, starting on low prf
+                    prf_type = 'EVENS'
+            else:
+                #rapic metadata
+                try:
+                    prf_ratio_str = d_how['rapic_UNFOLDING']
+                    fact_h = float(prf_ratio_str.decode('ascii')[0])
+                    fact_l = float(prf_ratio_str.decode('ascii')[2])
+                    prt_ratio = fact_l/fact_h
+                except Exception as e:
+                    prt_ratio = None
+                    #print(f'Failed to read rapic_UNFOLDING for sweep {sw} in {odim_file}', e)
+                    
+                try:
+                    prf_type_str = d_how['rapic_HIPRF']
+                    prf_type = prf_type_str.decode('ascii')
+                except Exception as e:
+                    prf_type = None #single PRF
                 
                 #print(f'rapic_HIPRF missing for sweep {sw} in {odim_file}, assuming single PRF', e)
                 
@@ -168,21 +191,18 @@ def _get_prf_pars_odimh5(odim_file, nrays, nsweeps, sw_start_end):
             prt_array[ray_s:ray_e] = 1/prf_h
             ny_array[ray_s:ray_e] = ny
     
-            if prf_ratio != b'None' and prf_type != None:
+            if prt_ratio != None and prf_type != None:
         
                 prt_mode_array[sw] = b'dual'
         
-                fact_h = float(prf_ratio.decode('ascii')[0])
-                fact_l = float(prf_ratio.decode('ascii')[2])
-        
-                prt_ratio_array[ray_s:ray_e] = fact_l/fact_h
+                prt_ratio_array[ray_s:ray_e] = prt_ratio
                 flag_sw = prf_flag_array[ray_s:ray_e]
         
-                if prf_type==b'EVENS':
-                    flag_sw[::2] = 1 # with 1 as the first index, 1=1, 2=0, 3=1
-                elif prf_type==b'ODDS': #odds=0, evens=1
-                    flag_sw[1::2] = 1 #with 1 as the first index, 1=0, 2=1, 3=0
-                elif prf_type==b'None':
+                if prf_type=='EVENS':
+                    flag_sw[::2] = 1 # with 1 as the first index, 1=1, 2=0, 3=1 (low, high, low)
+                elif prf_type=='ODDS': #odds=0, evens=1
+                    flag_sw[1::2] = 1 #with 1 as the first index, 1=0, 2=1, 3=0 (high, low, high)
+                elif prf_type=='None':
                     prt_mode_array[sw] = b'fixed'
                 else:
                     print('error, unknown flag type', prf_type)
