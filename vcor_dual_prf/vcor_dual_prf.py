@@ -14,7 +14,7 @@ Correct dual-PRF dealiasing errors
 
     correct_dualprf
     fold_circular
-    instrument_parameters_odim5
+    instrument_parameters_odimh5
     local_cmean
     local_mean
     local_median
