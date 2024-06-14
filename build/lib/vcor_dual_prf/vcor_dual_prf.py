@@ -86,7 +86,6 @@ def correct_dualprf(radar, method_det, vel_field='velocity',
     """
 
     vcorr = radar.fields[vel_field]['data'].copy()
-
     for sw, sweep_slice in enumerate(radar.iter_slice()):
 
         # Dual-PRF parameters
