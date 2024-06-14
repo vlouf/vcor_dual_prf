@@ -1,5 +1,5 @@
 Metadata-Version: 2.1
-Name: vcor-dual-prf
+Name: vcor_dual_prf
 Version: 1.0.0
 Summary: Correction .
 Home-page: https://github.com/paltube/vcor_dual_prf
@@ -16,6 +16,10 @@ Classifier: Programming Language :: Python :: 3.8
 Classifier: Programming Language :: Python :: 3.9
 Description-Content-Type: text/markdown
 License-File: LICENCE
+Requires-Dist: numpy
+Requires-Dist: arm_pyart
+Requires-Dist: h5py
+Requires-Dist: scipy
 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/meteocat/vcor_dual_prf/master?filepath=.%2Fexamples%2F01_correct_and_display.ipynb)
 

@@ -14,7 +14,7 @@ Correct dual-PRF dealiasing errors
 
     correct_dualprf
     fold_circular
-    instrument_parameters_odim5
+    instrument_parameters_odimh5
     local_cmean
     local_mean
     local_median
@@ -161,6 +161,8 @@ def correct_dualprf(radar, method_det, vel_field='velocity',
                         data=vcorr, std_name=None,
                         description='Correction of dual-PRF applied using technique developed by Hengstebeck et al. (2018) doi:10.1175/JTECH-D-16-0230.1. Implementation by Servei Meteorològic de Catalunya at https://github.com/meteocat/vcor_dual_prf',
                         long_name=new_field_lname, replace=replace)
+    
+    return radar
 
 
 def fold_circular(data_ma, mod):

@@ -131,77 +131,87 @@ def _get_prf_pars_odimh5(odim_file, nrays, nsweeps, sw_start_end):
     with h5py.File(odim_file, 'r') as hfile:
     
         for sw in range(0, nsweeps):
-    
+            # start and end rays of sweep
+            ray_s, ray_e = sw_start_end(sw)
+            ray_e += 1
             # extract PRF/NI data from odimh5 file
             d_name = 'dataset' + str(sw+1)
             d_how = hfile[d_name]['how'].attrs
+            #extract NI
             try:
                 ny = d_how['NI']
             except Exception as e:
                 ny = 0
                 print(f'Failed to read NI for sweep {sw} in {odim_file}', e)
-                
+            ny_array[ray_s:ray_e] = ny
+            #extract high prf
             try:
                 prf_h = d_how['highprf']
             except Exception as e:
                 prf_h = 1000
                 print(f'Failed to read highprf for sweep {sw} in {odim_file}', e)
-                
-
+            #extract prt values
+            #post Dec 2023 implementation
             if 'prt' in d_how.keys():
                 #post dec 2024 metadata
                 prt_vector = d_how['prt']
+                #prt_array[ray_s:ray_e] = prt_vector
                 prf_l = d_how['lowprf']
                 #calculate prt ratio
-                prt_ratio = prf_l/prf_h
+                prt_ratio = prf_h/prf_l
                 #calculate prf mode
-                prf_1 = prt_vector[0]
-                prf_2 = prt_vector[1]
                 #check if start on high PRF
-                if 1/prf_1 > 1/prf_2:
+                if 1/prt_vector[0] > 1/prt_vector[1]:
                     #ODDS mode, starting on high prf
                     prf_type = 'ODDS'
-                else:
+                elif 1/prt_vector[0] < 1/prt_vector[1]:
                     #EVENS mode, starting on low prf
                     prf_type = 'EVENS'
+                else:
+                    #single PRF
+                    prf_type = None
             else:
                 #rapic metadata
+                #prt ratio
                 try:
                     prf_ratio_str = d_how['rapic_UNFOLDING']
                     fact_h = float(prf_ratio_str.decode('ascii')[0])
                     fact_l = float(prf_ratio_str.decode('ascii')[2])
-                    prt_ratio = fact_l/fact_h
+                    prt_ratio = (1/fact_h)/(1/fact_l)
                 except Exception as e:
                     prt_ratio = None
                     #print(f'Failed to read rapic_UNFOLDING for sweep {sw} in {odim_file}', e)
-                    
+                #prt type
                 try:
                     prf_type_str = d_how['rapic_HIPRF']
                     prf_type = prf_type_str.decode('ascii')
                 except Exception as e:
-                    prf_type = None #single PRF
-                
-                #print(f'rapic_HIPRF missing for sweep {sw} in {odim_file}, assuming single PRF', e)
-                
-            # extract rays for current sweep
-            ray_s, ray_e = sw_start_end(sw) # start and end rays of sweep
-            ray_e += 1
+                    #single PRF
+                    prf_type = None 
+
+                # prt_sw = prt_array[ray_s:ray_e]
+                # if prf_type == 'EVENS' and prt_ratio is not None:
+                #     prt_sw[::2] = 1/prf_h*prt_ratio
+                #     prt_sw[1::2] = 1/prf_h
+                # elif prf_type == 'ODDS' and prt_ratio is not None:
+                #     prt_sw[::2] = 1/prf_h
+                #     prt_sw[1::2] = 1/prf_h*prt_ratio
+                # prt_array[ray_s:ray_e] = prt_sw
+
+            #set prt values to be 1/prf_h
+            prt_array[ray_s:ray_e] = 1/prf_h
 
             # Assign values
-            prt_array[ray_s:ray_e] = 1/prf_h
-            ny_array[ray_s:ray_e] = ny
-    
             if prt_ratio != None and prf_type != None:
         
                 prt_mode_array[sw] = b'dual'
-        
                 prt_ratio_array[ray_s:ray_e] = prt_ratio
                 flag_sw = prf_flag_array[ray_s:ray_e]
         
                 if prf_type=='EVENS':
                     flag_sw[::2] = 1 # with 1 as the first index, 1=1, 2=0, 3=1 (low, high, low)
-                elif prf_type=='ODDS': #odds=0, evens=1
-                    flag_sw[1::2] = 1 #with 1 as the first index, 1=0, 2=1, 3=0 (high, low, high)
+                elif prf_type=='ODDS':
+                    flag_sw[1::2] = 1 # with 0 as the first index, 1=0, 2=1, 3=0 (high, low, high)
                 elif prf_type=='None':
                     prt_mode_array[sw] = b'fixed'
                 else:
@@ -241,16 +251,15 @@ def get_prf_pars(radar, sw):
     sweep_start = radar.get_start(sw)
     sweep_slice = radar.get_slice(sw)
     v_nyq = pars['nyquist_velocity']['data'][sweep_start]
-    prf_h = round(1 / pars['prt']['data'][sweep_start], 0)
+    prf_h = np.max(np.round(1 / pars['prt']['data'][sweep_start:sweep_start+1], decimals=0))
     prt_mode = pars['prt_mode']['data'][sw]
     prf_fact = None
     prf_flag = None
     
-    if prt_mode != b'fixed':
+    if prt_mode == b'dual':
         prt_rat = pars['prt_ratio']['data'][sweep_start]
         if prt_rat != 1.0:
             prf_fact = int(round(1 / (prt_rat - 1), 0))
-    if prt_mode == b'dual':
         prf_flag = pars['prf_flag']['data'][sweep_slice].astype(int)
 
     return v_nyq, prf_h, prf_fact, prf_flag

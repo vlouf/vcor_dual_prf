@@ -86,7 +86,6 @@ def correct_dualprf(radar, method_det, vel_field='velocity',
     """
 
     vcorr = radar.fields[vel_field]['data'].copy()
-
     for sw, sweep_slice in enumerate(radar.iter_slice()):
 
         # Dual-PRF parameters
@@ -161,6 +160,8 @@ def correct_dualprf(radar, method_det, vel_field='velocity',
                         data=vcorr, std_name=None,
                         description='Correction of dual-PRF applied using technique developed by Hengstebeck et al. (2018) doi:10.1175/JTECH-D-16-0230.1. Implementation by Servei Meteorològic de Catalunya at https://github.com/meteocat/vcor_dual_prf',
                         long_name=new_field_lname, replace=replace)
+    
+    return radar
 
 
 def fold_circular(data_ma, mod):
